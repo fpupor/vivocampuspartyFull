@@ -1,0 +1,301 @@
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>Vivo Campus Party</title>
+	<meta name="description" content="Vivo Campus Party">
+	<meta name="author" content="Wunderman">
+	<!-- <link rel="stylesheet" href="css/reset.css" media="all" type="text/css"> -->
+	<link rel="stylesheet" href="css/layout.css" media="all" type="text/css">
+	<meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0, height=device-height, width=device-width, target-densityDpi=device-dpi" / > 
+	
+	<script src="phonegap.js"></script>
+	<script type="text/javascript" src="views.js"></script>
+	<script type="text/javascript" src="joystick.js"></script>
+		<script type="text/javascript">
+			
+			var eventStart = "ontouchstart";
+			var eventMove = "ontouchmove";
+			var eventEnd = "ontouchend";
+			var eventClick = "onmouseup";
+			/*var eventStart = "onmousedown";
+			var eventMove = "onmousemove";
+			var eventEnd = "onmouseup";
+			var eventClick = "onclick";*/
+			
+			var VERBOSE = false;
+			var TIME_UNBLOCK_RESTART = 10;
+			var counterRestartNum=TIME_UNBLOCK_RESTART;
+			var intervalRestart;
+			var counterRestart;
+			var waitMachineDiv;
+			var gameStarted;
+			var gameStatus;
+			// 0 pronto para jogar
+			// 1 jogando
+			// 2 fim do jogo
+			var outputTxt;
+			var strOutput= "";
+			var lines = [];
+			
+			function log (text){
+				if (VERBOSE && outputTxt)
+				{
+					console.log (text);
+					if (lines.length > 5) lines.shift();
+					lines.push (text);
+					outputTxt.innerHTML = lines.join("</br>");
+				}
+			}
+			
+			function init ()
+			{
+				
+				//clearDefaults( );
+				initGameOver();
+				joystick.init();
+				
+				if (VERBOSE) buildOutput();
+				
+				ViewsNavigator.add ("homestart", function(){
+					gameStatus = 0;
+				});
+				ViewsNavigator.add ("joystick", function(){
+					gameStatus = 1;
+					joystick.show();
+				}, function(){
+					joystick.hide();
+				});
+				
+				ViewsNavigator.add ("gameover", function(){
+					gameStatus = 2;
+					showGameOver();
+				});
+				
+				ViewsNavigator.init ();
+				
+				ViewsNavigator.go ("homestart");
+				
+				
+				request.send ("i");
+			}
+			
+			function buildOutput ()
+			{
+				outputTxt = document.createElement ("div");
+				outputTxt.id = "output";
+				document.body.appendChild (outputTxt);
+								log ("buildOutput");
+			}
+			
+			function initGameOver()
+			{
+				var divGameOver = document.getElementById ("gameover");
+				
+				counterRestart = document.createElement ("div");
+				counterRestart.className = "counterStyle";
+				counterRestart.id = "counterRestart";
+				divGameOver.appendChild (counterRestart);
+			}
+			
+			function showGameOver()
+			{
+				var scope = this;
+				waitMachineDiv = document.getElementById ("waitMachine");
+				waitMachineDiv[eventClick] = null;
+				
+				counterRestartNum = TIME_UNBLOCK_RESTART;
+				
+				scope.counterRestart.innerHTML = digitalFormat(TIME_UNBLOCK_RESTART, 2);
+				
+				clearInterval (intervalRestart);
+				
+				intervalRestart = setInterval (function(){
+					scope.counterRestartNum--;
+					scope.counterRestart.innerHTML = digitalFormat(scope.counterRestartNum, 2);
+					if (scope.counterRestartNum == 0)
+					{
+						clearInterval (scope.intervalRestart);
+						scope.enableRestart();
+					}
+				}, 1000);
+				
+			}
+			
+			function startJoystick ()
+			{
+				if (gameStarted) return;
+				gameStarted = true;
+				if(hasStatus(0)) 
+					ViewsNavigator.go('joystick');
+			}
+			
+			function enableRestart ()
+			{
+				waitMachineDiv[eventClick] = function (){
+					if(hasStatus(2))
+					{
+						gameStarted = false;
+						ViewsNavigator.go('homestart');
+					}
+				}
+			}
+			
+			function clearDefaults ()
+			{
+				var D = document;
+				var viewportcancel = function(e){ e.preventDefault(); e.stopPropagation();};
+		
+				try{
+					D.addEventListener('mousemove', viewportcancel, false);
+					D.addEventListener('mouseup', viewportcancel, false);
+					D.addEventListener('mousedown', viewportcancel, false);
+					D.addEventListener('contextmenu', viewportcancel, false);
+				}catch(e){
+					D.onmousemove = viewportcancel;
+					D.onmouseup = viewportcancel;
+					D.onmousedown = viewportcancel;
+					D.oncontextmenu = viewportcancel;
+				}
+				
+				var els = D.getElementsByTagName('*');
+				
+				//for(var x = 0; x < els.length; x++)
+						//els[x].onmouseup = els[x].onmousedown = els[x].oncontextmenu = viewportcancel;
+			}
+			
+			function digitalFormat (num, totalDigits)
+			{
+				var strNum = num.toString ();
+				while (totalDigits - strNum.length > 0)
+				{
+					strNum = "0" + strNum;
+				}
+				
+				return strNum;
+			}
+			
+			request = {
+				url: 'http://192.168.0.100/',
+				delay: 100,
+				lastcode: null,
+				requestTimer: null,
+			
+				send: function(code){
+					if(code == this.lastcode || code === undefined){
+						return;
+					}
+					
+					log ("send: " + code);
+					
+					clearTimeout(this.requestTimer);
+					
+					var clear = this.lastcode == null;
+					
+					this.lastcode = code;
+					
+					if(code == null){
+						this.httpRequest('c');
+					}else if(clear){
+						this.httpRequest(code);
+					}else{
+						var scope = this;
+						this.requestTimer = setTimeout(function(){
+							scope.httpRequest(code);
+						}, this.delay);
+					}
+				},
+			
+				lastHttpReq: null,
+			
+				httpRequest: function(strURL) {
+					
+					if(this.lastHttpReq){
+						this.lastHttpReq.xmlHttpReq.abort();
+						this.lastHttpReq.xmlHttpReq=null; 
+					}
+				
+					var thisHttpReq = {};
+					
+					if (window.XMLHttpRequest) {
+						thisHttpReq.xmlHttpReq = new XMLHttpRequest();
+					}
+					else if (window.ActiveXObject) {
+						thisHttpReq.xmlHttpReq = new ActiveXObject("Microsoft.XMLHTTP");
+					}
+					
+					thisHttpReq.xmlHttpReq.open('GET', this.url + strURL, true);
+					thisHttpReq.xmlHttpReq.onreadystatechange = function() {
+						if (thisHttpReq.xmlHttpReq.readyState == 1) {
+							if (thisHttpReq.xmlHttpReq) { 
+								thisHttpReq.xmlHttpReq.abort(); 
+								thisHttpReq.xmlHttpReq=null; 
+							}
+						}
+					}
+					
+					thisHttpReq.xmlHttpReq.send();
+					
+					this.lastHttpReq = thisHttpReq;
+				}
+			};
+			
+			window.addEventListener ("load", function(){
+			//document.addEventListener ("deviceready", function(){
+				init ();
+				
+				window.addEventListener("batterycritical", function(info) {
+					// Handle the battery critical event
+					alert("Battery Level Critical " + info.level + "%\nRecharge Soon!"); 
+				}, false);
+				
+				var cancelevent = function(){
+					return false;
+				}
+				
+				document.addEventListener("menubutton", cancelevent, false);
+				document.addEventListener("startcallbutton", cancelevent, false);
+				document.addEventListener("searchbutton", cancelevent, false);
+				document.addEventListener("endcallbutton", cancelevent, false);
+
+				document.addEventListener("pause", function(){
+					request.send('p');
+				}, false);
+
+				document.addEventListener("resume", function(){
+					request.send('y');
+				}, false);
+				
+			}, false);
+			
+			function hasStatus(status, ignoreError){
+				if(gameStatus == status){
+					return true;
+				}else{
+					if(ignoreError)
+						appError();
+						
+					return false;
+				}
+			}
+			
+			function appError(){
+				request.send('c');
+				navigator.app.exitApp();
+			}
+		</script>
+		
+</head>
+<body>
+		<div id="root">
+			<div id="homestart" class="view">
+				<div class="claw"></div>
+				<div id="btStart" onclick="startJoystick();"></div>
+			</div>
+			<div id="joystick" class="view"></div>
+			<div id="gameover" class="view">
+				<div class="claw"></div>
+				<div id="waitMachine"></div>
+			</div>
+		</div>
+</body>
+</html>

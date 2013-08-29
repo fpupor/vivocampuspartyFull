@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<widget xmlns = "http://www.w3.org/ns/widgets"
+	xmlns:gap= "http://phonegap.com/ns/1.0"
+	id= "br.com.wunderman.vivo.campusparty"
+	version= "0.0.2">
+
+	<name>Vivo Campus Party</name> 
+
+	<description>
+		Controle Vivo Campus Party 2013
+	</description>
+
+	<author href="https://github.com/fpupor"
+			email="fpupor@gmail.com">
+	</author>
+
+	<!--gap:splash src="img/splash.png" width="768" height="1024"/>
+	
+	<icon src="img/icon57.png" width="57" height="57" />
+	<icon src="img/icon72.png" gap:platform="ios" width="72" height="72" />
+	<icon src="img/icon114.png" width="114" height="114" /-->
+	
+	<gap:platforms>
+		<gap:platform name="android" minVersion="2.1" />
+	</gap:platforms>
+
+	<preference name="orientation" value="portrait" />
+	<preference name="fullscreen" value="true" />
+	<preference name="webviewbounce" value="false" />
+	
+	<feature name="http://api.phonegap.com/1.0/network"/>
+	<feature name="http://api.phonegap.com/1.0/battery"/>
+	<feature name="http://api.phonegap.com/1.0/notification"/>
+	<feature name="http://api.phonegap.com/1.0/device"/>
+	
+	<access origin=".*" />
+</widget>

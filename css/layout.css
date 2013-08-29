@@ -1,0 +1,140 @@
+*{margin:0;padding:0}
+
+body {
+	margin:0;
+	position:relative;
+}
+
+#output{
+	position:absolute;
+	left:0px;
+	top:0px;
+	width:400px;
+	height:100px;
+	background:#FFFFFF;
+	z-index:100;
+	opacity:0.8;
+}
+
+
+.view{
+	width:480px;
+	height:800px;
+	position:absolute;
+}
+
+.claw{
+	position:absolute;
+	width:480px;
+	height:639px;
+	top:115px;
+	background:url(../img/claw.png);
+}
+
+#root{
+	width:480px;
+	height:800px;
+	overflow:hidden;
+	background:url(../img/bg.jpg);
+}
+
+#joystickBase{
+	position:relative;
+	left:57px;
+	top:153px;
+	width:372px;
+	height:371px;
+	background:url(../img/joystick_base.png);
+}
+
+#joystickBall{
+	position:absolute;
+	left:91px;
+	top:80px;
+	width:201px;
+	height:252px;
+	background:url(../img/joystick_ball.png);
+}
+
+#btCatch{
+	position:absolute;
+	left:28px;
+	top:594px;
+	width:325px;
+	height:110px;
+	background:url(../img/bt_pegar.png);
+}
+
+#textCounterStartGame{
+	position:absolute;
+	left:0px;
+	top:0px;
+	z-index:2;
+	width:480px;
+	height:800px;
+	background:url(../img/game_starts_in.png);
+}
+
+
+#textCounterGame{
+	position:absolute;
+	left:367px;
+	top:597px;
+	width:79px;
+	height:36px;
+	background:url(../img/text_game_counter.png);
+}
+
+.counterStyle{
+	position:absolute;
+	font-family:"Arial Bold", Arial, sans-serif;
+	color:#8F3185;
+	text-align:center;
+}
+
+#counterStartGame{
+	left:95px;
+	top:280px;
+	width:280px;
+	height:215px;
+	font-size:280px;
+}
+
+#counterGame{
+	left:367px;
+	top:623px;
+	width:79px;
+	height:130px;
+	font-size:80px;
+}
+
+#counterRestart{
+	left:380px;
+	top:723px;
+	width:79px;
+	height:80px;
+	font-size:50px;
+}
+
+#btStart{
+	position:absolute;
+	left:144px;
+	top:247px;
+	width:321px;
+	height:191px;
+	background:url(../img/bt_start.png);
+}
+
+#waitMachine{
+	position:absolute;
+	left:146px;
+	top:280px;
+	width:306px;
+	height:151px;
+	background:url(../img/wait_machine.png);
+}
+
+/*#joystick{
+	position:absolute;
+	background:transparent url(transparent.gif);
+}*/
